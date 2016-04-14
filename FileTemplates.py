@@ -51,16 +51,18 @@ class CreateFileFromTemplateCommand(sublime_plugin.WindowCommand):
 
         try:
             content = self.template.find("content").text
-        except:
-            pass
-
-        try:
-            path = os.path.abspath(os.path.join(
-                os.path.dirname(self.template_path), self.template.find("file").text))
-            content = open(path).read()
             print(content)
         except:
             pass
+
+        if not content:
+            try:
+                path = os.path.abspath(os.path.join(
+                    os.path.dirname(self.template_path), self.template.find("file").text))
+                content = open(path).read()
+                print(content)
+            except:
+                pass
 
         return content
 
@@ -79,20 +81,39 @@ class CreateFileFromTemplateCommand(sublime_plugin.WindowCommand):
                     for pat in self.get_setting('excluded_dir_patterns')]
         self.excluded = re.compile('^(?:' + '|'.join(patterns) + ')$')
 
+    # def get_setting(self, key):
+    #     settings = None
+    #     view = self.window.active_view()
+
+    #     if view:
+    #         settings = self.window.active_view().settings()
+
+    #     if settings and settings.has('FileTemplates') and key in settings.get('FileTemplates'):
+    #         # Get project-specific setting
+    #         results = settings.get('FileTemplates')[key]
+    #     else:
+    #         # Get user-specific or default setting
+    #         settings = sublime.load_settings('FileTemplates.sublime-settings')
+    #         results = settings.get(key)
+
+    #     return results
     def get_setting(self, key):
         settings = None
-        view = self.window.active_view()
 
-        if view:
+        # Get user-specific or default setting
+        settings = sublime.load_settings('FileTemplates.sublime-settings')
+        results = settings.get(key)
+        print("======")
+        print(results)
+
+        if self.window.active_view():
             settings = self.window.active_view().settings()
 
-        if settings and settings.has('FileTemplates') and key in settings.get('FileTemplates'):
-            # Get project-specific setting
-            results = settings.get('FileTemplates')[key]
-        else:
-            # Get user-specific or default setting
-            settings = sublime.load_settings('FileTemplates.sublime-settings')
-            results = settings.get(key)
+            if settings and settings.has('FileTemplates') and key in settings.get('FileTemplates'):
+                # Get project-specific setting
+                results.update(settings.get('FileTemplates')[key])
+        print(results)
+
         return results
 
     def find_templates(self):
@@ -110,13 +131,13 @@ class CreateFileFromTemplateCommand(sublime_plugin.WindowCommand):
     def template_selected(self, selected_index):
         if selected_index != -1:
             self.template_path = self.template_paths[selected_index]
-            # print self.template_path
+
             tree = ElementTree.parse(open(self.template_path))
             self.template = tree
 
             self.construct_excluded_pattern()
             self.build_relative_paths()
-            # self.move_current_directory_to_top()
+            self.move_current_directory_to_top()
             self.show_quick_panel(self.relative_paths, self.dir_selected)
 
     def build_relative_paths(self):
@@ -147,12 +168,14 @@ class CreateFileFromTemplateCommand(sublime_plugin.WindowCommand):
         view = self.window.active_view()
 
         if view:
-            cur_dir = os.path.dirname(view.file_name())[self.rel_path_start:]
-            for path in self.relative_paths:
-                if path == cur_dir:
-                    i = self.relative_paths.index(path)
-                    self.relative_paths.insert(0, self.relative_paths.pop(i))
-                    break
+            if view.file_name():
+                cur_dir = os.path.dirname(view.file_name())[self.rel_path_start:]
+                if not self.relative_paths[0].startswith("Default:"):
+                    for path in self.relative_paths:
+                        if path == cur_dir:
+                            i = self.relative_paths.index(path)
+                            self.relative_paths.insert(0, self.relative_paths.pop(i))
+                            break
 
     def dir_selected(self, selected_index):
         if selected_index != -1:
@@ -214,7 +237,7 @@ class CreateFileFromTemplateCommand(sublime_plugin.WindowCommand):
 
         timepatterns = self.get_setting("creation_time")
         if timepatterns:
-            for key, pattern in timepatterns.iteritems():
+            for key, pattern in timepatterns.items():
                 self.variables[key] = time.strftime(pattern)
 
     def show_quick_panel(self, options, done):
@@ -230,7 +253,7 @@ class FileTemplatesListener(sublime_plugin.EventListener):
             populate_file(view)
             current_path = None
 
-
 def populate_file(view):
     global template
     view.run_command("insert_snippet", {'contents': template["content"]})
+    view.run_command("save")
