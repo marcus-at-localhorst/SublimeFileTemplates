@@ -1,4 +1,11 @@
-# File Templates for SublimeText 2
+# File Templates for SublimeText 3
+
+This is a modified fork from <https://github.com/evgenii/SublimeFileTemplates> where I just made it possible to render `creation_time` variables like `$date` in the filename (see new template BlogPost.file-template)
+
+```xml
+<filename>$date.$name.md</filename>
+```
+
 
 This Package enables you and other Package Developers to include File Templates.
 A File Template is basically a snippet, a filename, a default path and optional arguments.

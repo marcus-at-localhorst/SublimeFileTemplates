@@ -15,7 +15,7 @@
     "short_weekdayname": "%a",
     "weekdayname": "%A",
     "short_monthname": "%b",
-    "date": "%d/%m/%Y",
+    "date": "%Y-%m-%d",
     "time": "%H:%M:%S"
   }
 }

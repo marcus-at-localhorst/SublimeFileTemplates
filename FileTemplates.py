@@ -207,6 +207,7 @@ class CreateFileFromTemplateCommand(sublime_plugin.WindowCommand):
         self.next_argument()
 
     def replace_variables(self, text):
+        self.other_input()
         for variable in self.variables.keys():
             text = text.replace("$" + variable, self.variables[variable])
         return text

@@ -1,0 +1,29 @@
+<template>
+	<!-- You can us this to specifiy the content for the Template -->
+	<content><![CDATA[
+---
+Title: $title
+Date: $date
+Author: $author
+#Image: image.jpg
+#Status: draft
+---
+
+$1
+]]></content>
+	<!-- Or you set a path to a seperate Template File here -->
+	<!--<file>Files/FileTemplate.file-template</file>-->
+
+	<!-- The filename for the new File, you can use the arguments to make it dynamic, incl. variables from the creation_time object -->
+	<filename>$date.$name.md</filename>
+
+	<!-- Default Path to create the new file inside your current Project -->
+	<!-- you can use the arguments to make it dynamic -->
+	<path>/</path>
+
+	<!-- Optional: Add as much arguments as you need, they will be asked in the order specified -->
+	<arguments>
+		<name>Name:</name>
+		<title>Title:</title>
+	</arguments>
+</template>
